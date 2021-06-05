@@ -1,0 +1,94 @@
+name: '$(Version.MajorMinor).$(Version.Revision)$(Version.Suffix)'
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+      - develop
+      - release/*
+
+pool:
+  name: Hosted VS2017
+
+variables:
+  buildConfiguration: 'Release'
+  Version.MajorMinor: 0.1 # Major = non-backward compatible version increment, Minor = backward compatible version increment
+  Version.Revision: $[counter(variables['Version.MajorMinor'],0)] # Increments automatically every build, resets if Version.MajorMinor is changed
+
+  # Set the suffix of the version number depending on whether this is master, pr or other branch
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: 
+    Version.Suffix: ''      # master
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}: 
+    Version.Suffix: '-pr'   # pull request
+  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest')) }}: 
+    Version.Suffix: '-pre'  # pre-release
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: restore
+    projects: Valkyr.ECS.sln
+
+- task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+  displayName: 'Prepare analysis on SonarCloud'
+  inputs:
+    SonarCloud: SonarCloud
+    organization: 'leginiel-github'
+    projectKey: 'Leginiel_ValykrECS'
+    extraProperties: |
+      sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.opencover.xml
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    projects: Valkyr.ECS.sln
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: test
+    projects: '**/Valkyr.ECS.Tests.csproj'
+    arguments: ' --logger trx /p:Include="[Valkyr.ECS*]*" -v:n /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,cobertura\""'
+
+- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@1
+  displayName: ReportGenerator
+  continueOnError: true
+  inputs:
+    reports: '$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
+    targetdir: '$(Build.SourcesDirectory)\'
+    reporttypes: 'HtmlInline_AzurePipelines;HtmlChart'
+    
+- task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+  displayName: 'Run Code Analysis'
+  inputs:
+    extraProperties: sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.opencover.xml
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'Valkyr.ECS.nuspec'
+    nobuild: true
+    versioningScheme: 'byBuildNumber'
+
+- task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
+  displayName: 'Publish Quality Gate Result'
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Valkyr.ECS'
+  inputs:
+    ArtifactName: Valkyr.ECS
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '7d6ca53e-efbe-4997-824c-1ba1235a5b75/00c2c3a6-4465-4443-a765-a5aa67bfe68e'
