@@ -1,3 +1,5 @@
+name: '$(Version.MajorMinor).$(Version.Revision)$(Version.Suffix)'
+
 trigger:
   batch: true
   branches:
@@ -70,7 +72,7 @@ steps:
     command: 'pack'
     packagesToPack: 'Valkyr.ECS.nuspec'
     nobuild: true
-    versioningScheme: 'byEnvVar'
+    versioningScheme: 'byBuildNumber'
 
 - task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
   displayName: 'Publish Quality Gate Result'
