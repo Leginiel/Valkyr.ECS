@@ -15,7 +15,7 @@ variables:
   buildConfiguration: 'Release'
   Version.Major: 0 # Major = non-backward compatible version increment
   Version.Minor: 1 # Minor = backward compatible version increment 
-  Version.MajorMinor: $[variables['Version.Major']].$[variables['Version.Minor']]
+  Version.MajorMinor: '$(Version.Major).($Version.Minor)'
   Version.Revision: $[counter(variables['Version.MajorMinor'],0)] # Increments automatically every build, resets if Version.MajorMinor is changed
 
   # Set the suffix of the version number depending on whether this is master, pr or other branch
