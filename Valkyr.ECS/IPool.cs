@@ -1,12 +1,11 @@
-﻿using System;
-
-namespace Valkyr.ECS
+﻿namespace Valkyr.ECS
 {
-    public interface IPool : IDisposable
-    {
-        bool Create(); 
-        bool Store<T>(T value);
-        T Receive<T>(int index);
-        bool HasCapacity();
-    }
+  public interface IPool
+  {
+    bool TryStore<T>(int id, in T value)
+      where T : struct;
+    bool TryReceive<T>(int id, out T result)
+      where T : struct;
+    bool HasCapacity();
+  }
 }
