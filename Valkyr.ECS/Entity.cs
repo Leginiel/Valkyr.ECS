@@ -5,60 +5,47 @@ namespace Valkyr.ECS
   public readonly struct Entity : IEquatable<Entity>
   {
     public readonly int Id;
+    private readonly IWorld world;
 
     internal Entity(int id, IWorld world)
     {
       Id = id;
+      this.world = world;
     }
 
     public bool Has<T>()
-        where T : IComponent
+      where T : IComponent
     {
-      throw new NotImplementedException();
-    }
-    public bool HasComponents()
-    {
-      throw new NotImplementedException();
+      return world.Has<T>(Id);
     }
     public T Get<T>()
-        where T : IComponent
+      where T : IComponent
     {
-      throw new NotImplementedException();
+      return world.Get<T>(Id);
     }
     public bool Remove<T>()
-        where T : IComponent
+      where T : IComponent
     {
-      throw new NotImplementedException();
+      return world.Remove<T>(Id);
     }
     public bool Set<T>(in T component)
-        where T : IComponent
+      where T : IComponent
     {
-      throw new NotImplementedException();
+      return world.Set(Id, in component);
     }
-    public bool SetSameAs<T>(in Entity reference)
-        where T : IComponent
-    {
-      throw new NotImplementedException();
-    }
-
     public bool Equals(Entity other)
     {
-      throw new NotImplementedException();
-
-      //return Id.Equals(other.Id);
+      return Id.Equals(other.Id);
     }
 
     public override bool Equals(object obj)
     {
-      throw new NotImplementedException();
-
-      //return obj is Entity entity && Equals(entity);
+      return obj is Entity entity && Equals(entity);
     }
 
     public override int GetHashCode()
     {
-      throw new NotImplementedException();
-      //return HashCode.Combine(Id);
+      return HashCode.Combine(Id);
     }
 
     public static bool operator ==(Entity left, Entity right)
