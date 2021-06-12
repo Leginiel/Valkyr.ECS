@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using System;
 using Xunit;
 
 namespace Valkyr.ECS.Tests
@@ -9,59 +10,70 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void HasCapacity_PoolHasCapacity_True()
     {
-      IPool pool = Pool.Create<UnittestComponent>();
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
 
       pool.HasCapacity().Should().BeTrue();
     }
     [Fact]
     public void HasCapacity_PoolHasNoCapacity_False()
     {
-      IPool pool = Pool.Create<UnittestComponent>(0);
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>(0);
 
       pool.HasCapacity().Should().BeFalse();
     }
     [Fact]
-    public void TryStore_PoolHasCapoacity_True()
+    public void Store_PoolHasCapoacity_ComponentStored()
     {
-      IPool pool = Pool.Create<UnittestComponent>();
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
       UnittestComponent component = new(1);
 
-      pool.TryStore(1, component).Should().BeTrue();
+      pool.Store(1, component).Should().Be(component);
+      pool.Count.Should().Be(1);
     }
     [Fact]
-    public void TryStore_PoolHasWrongType_False()
+    public void Store_PoolHasNoCapoacity_ThrowsMaximumCapacityReached()
     {
-      IPool pool = Pool.Create<Entity>();
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>(0);
       UnittestComponent component = new(1);
+      Action action = () => pool.Store(1, component);
 
-      pool.TryStore(1, component).Should().BeFalse();
+      action.Should().ThrowExactly<MaximumCapacityReachedException>();
+      pool.Count.Should().Be(0);
     }
     [Fact]
-    public void TryStore_PoolHasNoCapoacity_False()
+    public void Receive_NoItemStored_MappingNotFoundException()
     {
-      IPool pool = Pool.Create<UnittestComponent>(0);
-      UnittestComponent component = new(1);
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>(0);
+      Action action = () => pool.Receive(1);
 
-      pool.TryStore(1, component).Should().BeFalse();
-    }
-    [Fact]
-    public void Receive_NoItemStored_Default()
-    {
-      IPool pool = Pool.Create<UnittestComponent>(0);
-
-      pool.TryReceive(1, out UnittestComponent result).Should().Be(false);
-      result.Should().Be(default(UnittestComponent));
+      action.Should().ThrowExactly<MappingNotFoundException>();
     }
     [Fact]
     public void Receive_ItemStored_Item()
     {
-      IPool pool = Pool.Create<UnittestComponent>();
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
       UnittestComponent component = new(1);
 
-      pool.TryStore(1, in component);
-      pool.TryReceive(1, out UnittestComponent result).Should().Be(true);
-      result.Should().Be(component);
+      pool.Store(1, in component);
+      pool.Receive(1).Should().Be(component);
+    }
+    [Fact]
+    public void Remove_ItemStored_True()
+    {
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      UnittestComponent component = new(1);
 
+      pool.Store(1, in component);
+      pool.Remove(1);
+      pool.Count.Should().Be(0);
+    }
+    [Fact]
+    public void Remove_ItemNotStored_False()
+    {
+      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      Action action = () => pool.Remove(1);
+
+      action.Should().ThrowExactly<MappingNotFoundException>();
     }
   }
 }

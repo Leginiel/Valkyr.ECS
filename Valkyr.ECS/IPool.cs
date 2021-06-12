@@ -1,11 +1,12 @@
 ﻿namespace Valkyr.ECS
 {
-  public interface IPool
+  public interface IPool<T>
+    where T : struct
   {
-    bool TryStore<T>(int id, in T value)
-      where T : struct;
-    bool TryReceive<T>(int id, out T result)
-      where T : struct;
+    int Count { get; }
+    ref T Store(int id, in T value);
+    ref T Receive(int id);
     bool HasCapacity();
+    void Remove(int id);
   }
 }

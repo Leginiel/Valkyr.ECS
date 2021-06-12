@@ -1,57 +1,89 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Valkyr.ECS
 {
-  internal class Pool : IPool
+  internal class Pool<T> : IPool<T>
+    where T : struct
   {
+    private const int InitialSize = 4;
     private readonly int maximumCapacity;
-    private readonly IDictionary storage;
+    private readonly Dictionary<int, int> mapping = new();
+    private T[] itemStorage = Array.Empty<T>();
+    private readonly Queue<int> emptySlots = new();
 
-    public static IPool Create<T>(int maximumCapacity = int.MaxValue)
-      where T : struct
-    {
-      return new Pool(new Dictionary<int, T>(), maximumCapacity);
-    }
+    public int Count => itemStorage.Length - emptySlots.Count;
 
-    private Pool(IDictionary storage, int maximumCapacity)
+    public Pool(int maximumCapacity = int.MaxValue)
     {
-      this.storage = storage;
       this.maximumCapacity = maximumCapacity;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasCapacity()
     {
-      return maximumCapacity - storage.Count > 0;
+      return maximumCapacity - itemStorage.Length > 0;
     }
-    public bool TryStore<T>(int id, in T item)
-      where T : struct
+    public ref T Store(int id, in T item)
     {
-      if (!HasCapacity())
-        return false;
+      bool mappingExists = mapping.TryGetValue(id, out int itemId);
 
-      IDictionary<int, T> storage = GetStorage<T>();
+      if (!mappingExists)
+      {
+        itemId = CreateMapping(id, in item);
+      }
 
-      return storage is not null && storage.TryAdd(id, item);
+      return ref itemStorage[itemId];
     }
-    public bool TryReceive<T>(int id, out T result)
-      where T : struct
+
+
+    public ref T Receive(int id)
     {
-      IDictionary<int, T> storage = GetStorage<T>();
-      result = default;
+      bool mappingExists = mapping.TryGetValue(id, out int itemId);
 
-      if (storage is null)
-        return false;
+      if (!mappingExists)
+        throw new MappingNotFoundException(id);
 
-      return storage.TryGetValue(id, out result);
+      return ref itemStorage[itemId];
     }
 
+    public void Remove(int id)
+    {
+      bool mappingExists = mapping.TryGetValue(id, out int itemId);
+
+      if (!mappingExists)
+        throw new MappingNotFoundException(id);
+
+      emptySlots.Enqueue(itemId);
+    }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IDictionary<int, T> GetStorage<T>()
+    private int CreateMapping(int id, in T item)
     {
-      return storage as IDictionary<int, T>;
+      if (emptySlots.Count == 0)
+      {
+        IncreaseStorage();
+      }
+
+      int slot = emptySlots.Dequeue();
+
+      itemStorage[slot] = item;
+      mapping.Add(id, slot);
+      return slot;
+    }
+
+    private void IncreaseStorage()
+    {
+      int currentSize = itemStorage.Length;
+
+      if (currentSize >= maximumCapacity)
+        throw new MaximumCapacityReachedException(maximumCapacity);
+
+      int newSize = Math.Min(currentSize * 2, maximumCapacity);
+      newSize = Math.Max(InitialSize, newSize);
+      Array.Resize(ref itemStorage, newSize);
+      for (int i = currentSize; i < newSize; i++)
+        emptySlots.Enqueue(i);
     }
   }
 }
