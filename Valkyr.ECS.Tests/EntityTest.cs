@@ -52,13 +52,13 @@ namespace Valkyr.ECS.Tests
 
       worldMock.VerifyAll();
     }
-    [Fact]
+    [Fact(Skip = "Waiting for Moq 5 return ref support")]
     public void Get_None_WorldIsCalledWithOwnId()
     {
       Mock<IWorld> worldMock = new();
       Entity entity = new(1, worldMock.Object);
 
-      worldMock.Setup(_ => _.Get<UnittestComponent>(entity.Id)).Verifiable();
+      //worldMock.Verify(r_ => _.Get<UnittestComponent>(entity.Id));
 
       entity.Get<UnittestComponent>();
 

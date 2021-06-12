@@ -23,15 +23,15 @@ namespace Valkyr.ECS
     {
       return world.Get<T>(Id);
     }
-    public bool Remove<T>()
+    public void Remove<T>()
       where T : IComponent
     {
-      return world.Remove<T>(Id);
+      world.Remove<T>(Id);
     }
-    public bool Set<T>(in T component)
+    public void Set<T>(in T component)
       where T : IComponent
     {
-      return world.Set(Id, in component);
+      world.Set(Id, in component);
     }
     public bool Equals(Entity other)
     {
