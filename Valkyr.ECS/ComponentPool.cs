@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace Valkyr.ECS
 {
-  internal class Pool<T> : IPool<T>
-    where T : struct
+  internal class ComponentPool<T> : IComponentPool<T>
+    where T : IComponent
   {
     private const int InitialSize = 4;
     private readonly int maximumCapacity;
@@ -15,7 +15,7 @@ namespace Valkyr.ECS
 
     public int Count => itemStorage.Length - emptySlots.Count;
 
-    public Pool(int maximumCapacity = int.MaxValue)
+    public ComponentPool(int maximumCapacity = int.MaxValue)
     {
       this.maximumCapacity = maximumCapacity;
     }
@@ -36,7 +36,10 @@ namespace Valkyr.ECS
 
       return ref itemStorage[itemId];
     }
-
+    public bool Has(int id)
+    {
+      return mapping.TryGetValue(id, out _);
+    }
 
     public ref T Receive(int id)
     {

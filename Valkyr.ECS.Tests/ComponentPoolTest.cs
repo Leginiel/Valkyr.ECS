@@ -4,27 +4,27 @@ using Xunit;
 
 namespace Valkyr.ECS.Tests
 {
-  public class PoolTest
+  public class ComponentPoolTest
   {
 
     [Fact]
     public void HasCapacity_PoolHasCapacity_True()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
 
       pool.HasCapacity().Should().BeTrue();
     }
     [Fact]
     public void HasCapacity_PoolHasNoCapacity_False()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>(0);
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>(0);
 
       pool.HasCapacity().Should().BeFalse();
     }
     [Fact]
     public void Store_PoolHasCapoacity_ComponentStored()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       UnittestComponent component = new(1);
 
       pool.Store(1, component).Should().Be(component);
@@ -33,7 +33,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void Store_PoolHasNoCapoacity_ThrowsMaximumCapacityReached()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>(0);
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>(0);
       UnittestComponent component = new(1);
       Action action = () => pool.Store(1, component);
 
@@ -41,9 +41,26 @@ namespace Valkyr.ECS.Tests
       pool.Count.Should().Be(0);
     }
     [Fact]
+    public void Has_PoolHasComponent_True()
+    {
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
+      UnittestComponent component = new(1);
+      pool.Store(1, component);
+
+
+      pool.Has(1).Should().BeTrue();
+    }
+    [Fact]
+    public void Has_PoolHasNotComponent_False()
+    {
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
+
+      pool.Has(1).Should().BeFalse();
+    }
+    [Fact]
     public void Receive_NoItemStored_MappingNotFoundException()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>(0);
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>(0);
       Action action = () => pool.Receive(1);
 
       action.Should().ThrowExactly<MappingNotFoundException>();
@@ -51,7 +68,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void Receive_ItemStored_Item()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       UnittestComponent component = new(1);
 
       pool.Store(1, in component);
@@ -60,7 +77,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void Remove_ItemStored_True()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       UnittestComponent component = new(1);
 
       pool.Store(1, in component);
@@ -70,7 +87,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void Remove_ItemNotStored_False()
     {
-      IPool<UnittestComponent> pool = new Pool<UnittestComponent>();
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       Action action = () => pool.Remove(1);
 
       action.Should().ThrowExactly<MappingNotFoundException>();
