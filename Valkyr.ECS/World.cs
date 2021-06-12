@@ -1,23 +1,92 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Valkyr.ECS
 {
-  public sealed class World : IWorld
+  public sealed partial class World : IWorld, IDisposable
   {
+    private const int InitialSize = 4;
     private readonly int maxCapacity;
+    private readonly Queue<int> freeEntities = new();
+    private Entity[] entities = Array.Empty<Entity>();
+    private bool disposedValue;
 
-    public World(int maxCapacity = int.MaxValue)
+    public short Id { get; }
+
+    public World(short id, int maxCapacity = int.MaxValue)
     {
+      Id = id;
       this.maxCapacity = maxCapacity;
     }
     public ref Entity CreateEntity()
     {
-      throw new NotImplementedException();
+      if (freeEntities.Count == 0)
+      {
+        IncreaseStorageSize();
+      }
+      int nextId = freeEntities.Dequeue();
+
+      return ref entities[nextId];
     }
 
     public bool Has<T>(int entityId)
+      where T : IComponent
     {
-      throw new NotImplementedException();
+      return ComponentManager.Instance<T>().GetOrCreate(Id, maxCapacity).Has(entityId);
+    }
+
+    public ref T Get<T>(int entityId)
+      where T : IComponent
+    {
+      return ref ComponentManager.Instance<T>().GetOrCreate(Id, maxCapacity).Receive(entityId);
+    }
+
+    public void Set<T>(int entityId, in T component)
+      where T : IComponent
+    {
+      ComponentManager.Instance<T>().GetOrCreate(Id, maxCapacity).Store(entityId, in component);
+    }
+
+    public void Remove<T>(int entityId)
+      where T : IComponent
+    {
+      ComponentManager.Instance<T>().GetOrCreate(Id, maxCapacity).Remove(entityId);
+    }
+
+    private void IncreaseStorageSize()
+    {
+      int currentSize = entities.Length;
+
+      if (currentSize >= maxCapacity)
+        throw new MaximumCapacityReachedException(maxCapacity);
+
+      int newSize = Math.Min(currentSize * 2, maxCapacity);
+      newSize = Math.Max(InitialSize, newSize);
+      Array.Resize(ref entities, newSize);
+      for (int i = currentSize; i < newSize; i++)
+      {
+        freeEntities.Enqueue(i);
+        entities[i] = new(i, this);
+      }
+    }
+
+    private void Dispose(bool disposing)
+    {
+      if (!disposedValue)
+      {
+        if (disposing)
+        {
+          entities = null;
+          ComponentManager.Remove(Id);
+        }
+        disposedValue = true;
+      }
+    }
+
+    public void Dispose()
+    {
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
     }
   }
 }
