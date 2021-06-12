@@ -33,6 +33,7 @@ namespace Valkyr.ECS
       {
         itemId = CreateMapping(id, in item);
       }
+      itemStorage[itemId] = item;
 
       return ref itemStorage[itemId];
     }
@@ -58,6 +59,7 @@ namespace Valkyr.ECS
       if (!mappingExists)
         throw new MappingNotFoundException(id);
 
+      mapping.Remove(id);
       emptySlots.Enqueue(itemId);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -69,8 +71,6 @@ namespace Valkyr.ECS
       }
 
       int slot = emptySlots.Dequeue();
-
-      itemStorage[slot] = item;
       mapping.Add(id, slot);
       return slot;
     }

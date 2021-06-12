@@ -22,12 +22,23 @@ namespace Valkyr.ECS.Tests
       pool.HasCapacity().Should().BeFalse();
     }
     [Fact]
-    public void Store_PoolHasCapoacity_ComponentStored()
+    public void Store_PoolHasCapacity_ComponentStored()
     {
       IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       UnittestComponent component = new(1);
 
       pool.Store(1, component).Should().Be(component);
+      pool.Count.Should().Be(1);
+    }
+    [Fact]
+    public void Store_ComponentAlreadyStored_ComponentStored()
+    {
+      IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
+      UnittestComponent component = new(1);
+      UnittestComponent component2 = new(2);
+
+      pool.Store(1, component);
+      pool.Store(1, component2).Should().Be(component2);
       pool.Count.Should().Be(1);
     }
     [Fact]
@@ -75,7 +86,7 @@ namespace Valkyr.ECS.Tests
       pool.Receive(1).Should().Be(component);
     }
     [Fact]
-    public void Remove_ItemStored_True()
+    public void Remove_ItemStored_PoolShouldBeEmpty()
     {
       IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       UnittestComponent component = new(1);
@@ -85,7 +96,7 @@ namespace Valkyr.ECS.Tests
       pool.Count.Should().Be(0);
     }
     [Fact]
-    public void Remove_ItemNotStored_False()
+    public void Remove_ItemNotStored_ThrowsMappingNotFoundException()
     {
       IComponentPool<UnittestComponent> pool = new ComponentPool<UnittestComponent>();
       Action action = () => pool.Remove(1);
