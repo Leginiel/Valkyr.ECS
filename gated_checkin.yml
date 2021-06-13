@@ -49,7 +49,7 @@ steps:
   displayName: 'dotnet test'
   inputs:
     command: test
-    projects: '**/Valkyr.ECS.Test.csproj'
+    projects: '**/Valkyr.ECS.Tests.csproj'
     arguments: '--logger trx /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
 
 
