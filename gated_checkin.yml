@@ -62,7 +62,6 @@ steps:
   inputs:
     command: 'pack'
     packagesToPack: 'Valkyr.ECS.nuspec'
-    nobuild: true
     versioningScheme: 'byBuildNumber'
 
 - task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
