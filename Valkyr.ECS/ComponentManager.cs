@@ -26,8 +26,6 @@ namespace Valkyr.ECS
   {
     private readonly ConcurrentDictionary<short, IComponentPool<T>> pools = new();
 
-    public int PoolCount => pools.Count;
-
     public IComponentPool<T> GetOrCreate(short worldId, int maxCapacity)
     {
       return pools.GetOrAdd(worldId, new ComponentPool<T>(maxCapacity));

@@ -13,7 +13,6 @@ namespace Valkyr.ECS.Tests
       ComponentManager<UnittestComponent> componentManager = ComponentManager.Instance<UnittestComponent>();
 
       componentManager.GetOrCreate(worldId, maxCapacity).Should().NotBeNull();
-      componentManager.PoolCount.Should().Be(1);
     }
     [Fact]
     public void Remove_ValidWorldIdAndPool_PoolRemoved()
@@ -24,7 +23,6 @@ namespace Valkyr.ECS.Tests
 
       componentManager.GetOrCreate(worldId, maxCapacity).Should().NotBeNull();
       componentManager.Remove(worldId).Should().BeTrue();
-      componentManager.PoolCount.Should().Be(0);
     }
   }
 }
