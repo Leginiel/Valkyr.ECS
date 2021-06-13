@@ -49,8 +49,9 @@ steps:
   displayName: 'dotnet test'
   inputs:
     command: test
-    projects: '**/Valkyr.ECS.Tests.csproj'
-    arguments: ' --logger trx /p:Include="[Valkyr.ECS*]*" -v:n /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,cobertura\""'
+    projects: '**/Valkyr.ECS.Test.csproj'
+    arguments: '--logger trx /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+
 
 - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
   displayName: 'Run Code Analysis'
@@ -77,6 +78,18 @@ steps:
   displayName: 'Publish Artifact: Valkyr.ECS'
   inputs:
     ArtifactName: Valkyr.ECS
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results **/*.trx'
+  inputs:
+    testResultsFormat: VSTest
+    testResultsFiles: '**/*.trx'
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(Build.SourcesDirectory)\coverage.cobertura.xml'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(Build.SourcesDirectory)\coverage.cobertura.xml'
 
 - task: DotNetCoreCLI@2
   inputs:

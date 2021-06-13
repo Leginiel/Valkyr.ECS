@@ -6,7 +6,7 @@
     <title>$title$</title>
     <authors>Sebastian Berning</authors>
     <owners>Sebastian Berning</owners>
-    <description></description>
+    <description>Valkyr.ECS</description>
     <dependencies>
       <group targetFramework="net5.0" />
     </dependencies>
