@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Valkyr.ECS
 {
@@ -7,5 +8,7 @@ namespace Valkyr.ECS
   {
     public MaximumCapacityReachedException(int maxCapacity)
     : base($"Maximum capacity of {maxCapacity} for storage reached") { }
+    protected MaximumCapacityReachedException(SerializationInfo info, StreamingContext context)
+      : base(info, context) { }
   }
 }
