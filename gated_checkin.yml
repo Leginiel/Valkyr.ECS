@@ -48,12 +48,12 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet test'
+  displayName: dotnet test
   inputs:
-    command: 'test'
+    command: test
     projects: '**/Valkyr.ECS.Tests.csproj'
-    arguments: '--logger trx /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,Cobertura\""
-
+    arguments: '--configuration $(BuildConfiguration) /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,Cobertura\""'
+    nobuild: true
 
 - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
   displayName: 'Run Code Analysis'
