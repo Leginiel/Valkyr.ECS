@@ -43,52 +43,52 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
-    projects: Valkyr.ECS.sln
+    command: 'build'
+    projects: 'Valkyr.ECS.sln'
+    arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet test'
+  displayName: dotnet test
   inputs:
     command: test
     projects: '**/Valkyr.ECS.Tests.csproj'
-    arguments: ' --logger trx /p:Include="[Valkyr.ECS*]*" -v:n /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,cobertura\""'
+    arguments: '--configuration $(BuildConfiguration) /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,Cobertura\""'
+    nobuild: true
 
-- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@1
-  displayName: ReportGenerator
-  continueOnError: true
-  inputs:
-    reports: '$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
-    targetdir: '$(Build.SourcesDirectory)\'
-    reporttypes: 'HtmlInline_AzurePipelines;HtmlChart'
-    
 - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
   displayName: 'Run Code Analysis'
   inputs:
-    extraProperties: sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.opencover.xml
+    extraProperties: sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.coopencover.xml
 
-- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
   inputs:
     command: 'pack'
     packagesToPack: 'Valkyr.ECS.nuspec'
-    nobuild: true
     versioningScheme: 'byBuildNumber'
 
 - task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
   displayName: 'Publish Quality Gate Result'
-
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from $(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Valkyr.ECS'
   inputs:
     ArtifactName: Valkyr.ECS
 
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results **/*.trx'
+  inputs:
+    testResultsFormat: VSTest
+    testResultsFiles: '**/*.trx'
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(Build.SourcesDirectory)\coverage.cobertura.xml'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(Build.SourcesDirectory)\coverage.cobertura.xml'
+
 - task: DotNetCoreCLI@2
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
     nuGetFeedType: 'internal'
-    publishVstsFeed: '7d6ca53e-efbe-4997-824c-1ba1235a5b75/00c2c3a6-4465-4443-a765-a5aa67bfe68e'
+    publishVstsFeed: '633583b1-b001-4888-9aca-3b760e993cf6/552862c7-4e9f-4d51-8c70-b3d38897d621'

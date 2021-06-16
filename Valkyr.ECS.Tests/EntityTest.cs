@@ -41,68 +41,53 @@ namespace Valkyr.ECS.Tests
       entity.GetHashCode().Should().Be(entity2.GetHashCode());
     }
     [Fact]
-    public void Has_EntitiesHasComponent_True()
+    public void Has_None_WorldIsCalledWithOwnId()
     {
       Mock<IWorld> worldMock = new();
-      Entity entity = new(0, worldMock.Object);
+      Entity entity = new(1, worldMock.Object);
 
-      worldMock.Setup(_ => _.Has<It.IsAnyType>(It.IsAny<int>())).Returns(true);
+      worldMock.Setup(_ => _.Has<UnittestComponent>(entity.Id)).Verifiable();
 
-      entity.Has<UnittestComponent>().Should().BeTrue();
+      entity.Has<UnittestComponent>();
+
+      worldMock.VerifyAll();
     }
-    [Fact]
-    public void Has_EntityNotHavingComponents_False()
+    [Fact(Skip = "Waiting for Moq 5 return ref support")]
+    public void Get_None_WorldIsCalledWithOwnId()
     {
       Mock<IWorld> worldMock = new();
-      Entity entity = new(0, worldMock.Object);
+      Entity entity = new(1, worldMock.Object);
 
-      worldMock.Setup(_ => _.Has<It.IsAnyType>(It.IsAny<int>())).Returns(false);
+      //worldMock.Verify(r_ => _.Get<UnittestComponent>(entity.Id));
 
-      entity.Has<UnittestComponent>().Should().BeFalse();
+      entity.Get<UnittestComponent>();
+
+      worldMock.VerifyAll();
     }
-    [Fact]
-    public void Get_EntityNotHavingComponent_DefaultValue()
+    [Fact(Skip = "https://github.com/castleproject/Core/issues/430#issuecomment-756309040")]
+    public void Set_None_WorldIsCalledWithOwnId()
     {
-      World world = new();
-      Entity entity = new(0, world);
-
-      entity.Get<UnittestComponent>().Should().Be(default);
-    }
-    [Fact]
-    public void Get_EntityHavingComponent_ComponentIsReturned()
-    {
-      World world = new();
-      Entity entity = new(0, world);
+      Mock<IWorld> worldMock = new();
+      Entity entity = new(1, worldMock.Object);
       UnittestComponent component = new(1);
 
+      worldMock.Setup(_ => _.Set(entity.Id, in component)).Verifiable();
+
       entity.Set(component);
-      entity.Get<UnittestComponent>().Should().Be(component);
+
+      worldMock.VerifyAll();
     }
     [Fact]
-    public void Set_EntityNotHavingComponent_ComponentIsSet()
+    public void Remove_None_WorldIsCalledWithOwnId()
     {
-      World world = new();
-      Entity entity = new(0, world);
-      UnittestComponent component = new(1);
+      Mock<IWorld> worldMock = new();
+      Entity entity = new(1, worldMock.Object);
 
-      entity.Set(component);
-      entity.Has<UnittestComponent>().Should().BeTrue();
-      entity.Get<UnittestComponent>().Should().Be(component);
+      worldMock.Setup(_ => _.Remove<UnittestComponent>(entity.Id)).Verifiable();
+
+      entity.Remove<UnittestComponent>();
+
+      worldMock.VerifyAll();
     }
-
-    [Fact]
-    public void Set_EntityHavingComponent_ComponentIsOverwritten()
-    {
-      World world = new();
-      Entity entity = new(0, world);
-      UnittestComponent component = new(1);
-      UnittestComponent component2 = new(2);
-
-      entity.Set(component);
-      entity.Set(component2);
-      entity.Has<UnittestComponent>().Should().BeTrue();
-      entity.Get<UnittestComponent>().Should().Be(component2);
-    }
-
   }
 }
