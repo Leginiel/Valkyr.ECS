@@ -16,9 +16,9 @@ namespace Valkyr.ECS.Tests
     private readonly ITestOutputHelper _output;
 
     [Component("ComponentGerneratorTest")]
-    private int value;
+    private int value = 0;
     [Component("ComponentGerneratorTest")]
-    private int value2;
+    private int value2 = 0;
 
     public ComponentGeneratorTest(ITestOutputHelper output)
     {

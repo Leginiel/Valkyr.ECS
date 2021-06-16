@@ -19,8 +19,6 @@ namespace Valkyr.ECS.Generator
       if (!(context.SyntaxContextReceiver is FieldAttributeSyntaxReceiver receiver))
         return;
 
-      INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName("Valkyr.ECS.ComponentAttribute");
-
 #pragma warning disable RS1024 // Compare symbols correctly
       foreach (IGrouping<string, IFieldSymbol> group in receiver.Fields.GroupBy(f => f.GetAttributes().First(_ => _.AttributeClass.Name.Equals("ComponentAttribute")).ConstructorArguments[0].Value as string))
 #pragma warning restore RS1024 // Compare symbols correctly
