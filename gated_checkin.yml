@@ -52,7 +52,7 @@ steps:
   inputs:
     command: 'test'
     projects: '**/Valkyr.ECS.Tests.csproj'
-    arguments: '--logger trx /p:CollectCoverage=true /p:CoverletOutputFormat="opencover,cobertura"'
+    arguments: '--logger trx /p:CollectCoverage=true "/p:CoverletOutputFormat=\"opencover,Cobertura\""
 
 
 - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
