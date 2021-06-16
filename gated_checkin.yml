@@ -43,7 +43,9 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
-    projects: Valkyr.ECS.sln
+    command: 'build'
+    projects: 'Valkyr.ECS.sln'
+    arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
