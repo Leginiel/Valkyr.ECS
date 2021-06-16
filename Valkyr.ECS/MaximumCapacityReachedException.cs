@@ -2,6 +2,7 @@
 
 namespace Valkyr.ECS
 {
+  [Serializable]
   public class MaximumCapacityReachedException : Exception
   {
     public MaximumCapacityReachedException(int maxCapacity)

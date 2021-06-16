@@ -2,6 +2,7 @@
 
 namespace Valkyr.ECS
 {
+  [Serializable]
   public class MappingNotFoundException : Exception
   {
     public MappingNotFoundException(int id)
