@@ -12,6 +12,8 @@
     </dependencies>
   </metadata>
    <files>
-     <file src="bin\Release\net5.0\Valkyr.ECS.*.dll" target="lib\net5.0" />
+     <file src="Valkyr.ECS.Generator\bin\Release\netstandard2.0\Valkyr.ECS.Generator.dll" target="analyzers\dotnet\cs" />
+     <file src="Valkyr.ECS\bin\Release\net5.0\Valkyr.ECS.dll" target="lib\net5.0" />
+     <file src="Valkyr.ECS.Generator\*.ps1" target="tools\" />
   </files>
 </package>

@@ -38,7 +38,7 @@ steps:
     organization: 'leginiel-github'
     projectKey: 'Leginiel_ValykrECS'
     extraProperties: |
-      sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.opencover.xml
+      sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
@@ -56,9 +56,9 @@ steps:
 - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
   displayName: 'Run Code Analysis'
   inputs:
-    extraProperties: sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.opencover.xml
+    extraProperties: sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml
 
-- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
   inputs:
     command: 'pack'
     packagesToPack: 'Valkyr.ECS.nuspec'
@@ -66,12 +66,6 @@ steps:
 
 - task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
   displayName: 'Publish Quality Gate Result'
-
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from $(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(Build.SourcesDirectory)\Valkyr.ECS.Tests\coverage.cobertura.xml'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Valkyr.ECS'
