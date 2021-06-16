@@ -1,10 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Valkyr.ECS.Generator
 {
+  [ExcludeFromCodeCoverage]
   internal class FieldAttributeSyntaxReceiver : ISyntaxContextReceiver
   {
     public List<IFieldSymbol> Fields { get; } = new List<IFieldSymbol>();

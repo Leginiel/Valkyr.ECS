@@ -1,11 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
 namespace Valkyr.ECS.Generator
 {
   [Generator]
+  [ExcludeFromCodeCoverage]
   public class ComponentGenerator : ISourceGenerator
   {
     public void Initialize(GeneratorInitializationContext context)
