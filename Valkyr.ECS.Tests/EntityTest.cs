@@ -32,6 +32,44 @@ namespace Valkyr.ECS.Tests
       entity.Equals(null).Should().BeFalse();
     }
     [Fact]
+    public void EqualsOperator_ComparisonWithSameEntity_True()
+    {
+      Mock<IWorld> worldMock = new();
+      Entity entity = new(1, worldMock.Object);
+
+#pragma warning disable CS1718 // Comparison made to same variable
+      (entity == entity).Should().BeTrue();
+#pragma warning restore CS1718 // Comparison made to same variable
+    }
+    [Fact]
+    public void EqualsOperator_ComparisonWithDifferentEntity_False()
+    {
+      Mock<IWorld> worldMock = new();
+      Entity entity = new(1, worldMock.Object);
+      Entity entity2 = new(2, worldMock.Object);
+
+      (entity == entity2).Should().BeFalse();
+    }
+    [Fact]
+    public void NotEqualsOperator_ComparisonWithSameEntity_False()
+    {
+      Mock<IWorld> worldMock = new();
+      Entity entity = new(1, worldMock.Object);
+
+#pragma warning disable CS1718 // Comparison made to same variable
+      (entity != entity).Should().BeFalse();
+#pragma warning restore CS1718 // Comparison made to same variable
+    }
+    [Fact]
+    public void NotEqualsOperator_ComparisonWithDifferentEntity_True()
+    {
+      Mock<IWorld> worldMock = new();
+      Entity entity = new(1, worldMock.Object);
+      Entity entity2 = new(2, worldMock.Object);
+
+      (entity != entity2).Should().BeTrue();
+    }
+    [Fact]
     public void GetHashCode_SameEntityId_SameHashcode()
     {
       Mock<IWorld> worldMock = new();
