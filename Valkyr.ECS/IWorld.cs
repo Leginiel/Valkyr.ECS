@@ -11,5 +11,6 @@
       where T : IComponent;
     void Remove<T>(int entityId)
       where T : IComponent;
+    void IterateEntities(ActionRef<Entity> entityCallback, IFilterExpression filter);
   }
 }

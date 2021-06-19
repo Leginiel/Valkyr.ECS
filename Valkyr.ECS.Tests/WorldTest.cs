@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Moq;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Valkyr.ECS.Tests
@@ -107,6 +109,27 @@ namespace Valkyr.ECS.Tests
       world.Remove<UnittestComponent>(entity.Id);
 
       world.Has<UnittestComponent>(entity.Id).Should().BeFalse();
+    }
+    [Fact]
+    public void IterateEntities_WorldHasEntities_AllEntitiesAreReturned()
+    {
+      using World world = new(0);
+      Mock<ActionRef<Entity>> entityActionMock = new();
+      List<Entity> expectedResult = new()
+      {
+        world.CreateEntity(),
+        world.CreateEntity(),
+        world.CreateEntity()
+      };
+      List<Entity> result = new();
+
+      entityActionMock.Setup(_ => _.Invoke(ref It.Ref<Entity>.IsAny))
+                      .Callback(new ActionRef<Entity>((ref Entity _) => result.Add(_)));
+
+      world.IterateEntities(entityActionMock.Object, FilterExpressions.All);
+
+      entityActionMock.Verify(_ => _.Invoke(ref It.Ref<Entity>.IsAny), Times.Exactly(3));
+      expectedResult.Should().BeEquivalentTo(result);
     }
   }
 }
