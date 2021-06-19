@@ -8,7 +8,7 @@ namespace Valkyr.ECS
     private static IFilterExpression all;
     private static Dictionary<Type, IFilterExpression> componentFilter = new();
 
-    public static IFilterExpression All => all ??= new AllFilterExpression();
+    public static IFilterExpression All() => all ??= new AllFilterExpression();
     public static IFilterExpression Component<T>()
       where T : IComponent
     {

@@ -126,7 +126,7 @@ namespace Valkyr.ECS.Tests
       entityActionMock.Setup(_ => _.Invoke(ref It.Ref<Entity>.IsAny))
                       .Callback(new ActionRef<Entity>((ref Entity _) => result.Add(_)));
 
-      world.IterateEntities(entityActionMock.Object, FilterExpressions.All);
+      world.IterateEntities(entityActionMock.Object, FilterExpressions.All());
 
       entityActionMock.Verify(_ => _.Invoke(ref It.Ref<Entity>.IsAny), Times.Exactly(3));
       expectedResult.Should().BeEquivalentTo(result);

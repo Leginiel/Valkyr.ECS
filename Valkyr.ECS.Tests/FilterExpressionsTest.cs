@@ -14,8 +14,8 @@ namespace Valkyr.ECS.Tests
         new Entity(0, null),
         new Entity(1, null)
       };
-      FilterExpressions.All.Matches(ref entities[0]).Should().BeTrue();
-      FilterExpressions.All.Matches(ref entities[1]).Should().BeTrue();
+      FilterExpressions.All().Matches(ref entities[0]).Should().BeTrue();
+      FilterExpressions.All().Matches(ref entities[1]).Should().BeTrue();
     }
     [Fact]
     public void Component_EntitiesHaveComponent_ReturnsTrue()
