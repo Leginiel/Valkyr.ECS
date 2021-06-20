@@ -1,7 +1,11 @@
-﻿namespace Valkyr.ECS
+﻿using System;
+
+namespace Valkyr.ECS
 {
-  public interface IWorld
+  public interface IWorld : IDisposable
   {
+    short Id { get; }
+    bool Active { get; set; }
     ref Entity CreateEntity();
     bool Has<T>(int entityId)
       where T : IComponent;

@@ -12,6 +12,7 @@ namespace Valkyr.ECS
     private bool disposedValue;
 
     public short Id { get; }
+    public bool Active { get; set; } = true;
 
     public World(short id, int maxCapacity = int.MaxValue)
     {
