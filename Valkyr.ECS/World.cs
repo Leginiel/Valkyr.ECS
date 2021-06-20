@@ -12,6 +12,7 @@ namespace Valkyr.ECS
     private bool disposedValue;
 
     public short Id { get; }
+    public bool Active { get; set; } = true;
 
     public World(short id, int maxCapacity = int.MaxValue)
     {
@@ -52,6 +53,22 @@ namespace Valkyr.ECS
     {
       ComponentManager.Instance<T>().GetOrCreate(Id, maxCapacity).Remove(entityId);
     }
+    public void Dispose()
+    {
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
+    }
+    public void IterateEntities(ActionRef<Entity> entityCallback, IFilterExpression filter)
+    {
+      for (int i = 0; i < entities.Length; i++)
+      {
+        ref Entity entity = ref entities[i];
+        if (!freeEntities.Contains(i) && filter.Matches(ref entity))
+        {
+          entityCallback.Invoke(ref entity);
+        }
+      }
+    }
 
     private void IncreaseStorageSize()
     {
@@ -69,7 +86,6 @@ namespace Valkyr.ECS
         entities[i] = new(i, this);
       }
     }
-
     private void Dispose(bool disposing)
     {
       if (!disposedValue)
@@ -83,10 +99,5 @@ namespace Valkyr.ECS
       }
     }
 
-    public void Dispose()
-    {
-      Dispose(disposing: true);
-      GC.SuppressFinalize(this);
-    }
   }
 }
