@@ -8,7 +8,7 @@
     protected abstract void Update(ref Entity entity);
     public virtual void Update(IWorld world)
     {
-      world.IterateEntities(Update, FilterExpressions.All());
+      world.IterateEntities(Update, FilterExpressions.Component<T>());
     }
   }
 }
