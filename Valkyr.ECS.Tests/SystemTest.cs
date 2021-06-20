@@ -16,7 +16,7 @@ namespace Valkyr.ECS.Tests
     public void Update_ValidWorldAndThereAreEnities_UpdateMethodIsCalledForEveryValidEntity()
     {
       Mock<IWorld> worldMock = new();
-      Mock<System<UnittestComponent>> systemMock = new(worldMock.Object);
+      Mock<System<UnittestComponent>> systemMock = new();
       Entity[] entities = new Entity[] {
           new Entity(1, worldMock.Object),
           new Entity(2, worldMock.Object),
@@ -38,7 +38,7 @@ namespace Valkyr.ECS.Tests
                .Returns(true)
                .Returns(true);
 
-      systemMock.Object.Update();
+      systemMock.Object.Update(worldMock.Object);
       systemMock.Protected()
                 .As<ISystemImpl>()
                 .Verify(_ => _.Update(ref entities[0]), Times.Once());
@@ -53,7 +53,7 @@ namespace Valkyr.ECS.Tests
     public void Update_ValidWorldAndThereAreEnitiesDisabledSystem_UpdateMethodIsNotCalled()
     {
       Mock<IWorld> worldMock = new();
-      Mock<System<UnittestComponent>> systemMock = new(worldMock.Object);
+      Mock<System<UnittestComponent>> systemMock = new();
       Entity[] entities = new Entity[] {
           new Entity(1, worldMock.Object),
           new Entity(2, worldMock.Object),
@@ -80,7 +80,7 @@ namespace Valkyr.ECS.Tests
 
       systemMock.Object.Enabled = false;
 
-      systemMock.Object.Update();
+      systemMock.Object.Update(worldMock.Object);
 
       systemMock.VerifyAll();
     }

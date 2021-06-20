@@ -3,6 +3,6 @@
   public interface ISystem
   {
     public bool Enabled { get; set; }
-    public void Update();
+    public void Update(IWorld world);
   }
 }
