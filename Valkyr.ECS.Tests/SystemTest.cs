@@ -16,7 +16,10 @@ namespace Valkyr.ECS.Tests
     public void Update_ValidWorldAndThereAreEnities_UpdateMethodIsCalledForEveryValidEntity()
     {
       Mock<IWorld> worldMock = new();
-      Mock<System<UnittestComponent>> systemMock = new();
+      Mock<System<UnittestComponent>> systemMock = new()
+      {
+        CallBase = true
+      };
       Entity[] entities = new Entity[] {
           new Entity(1, worldMock.Object),
           new Entity(2, worldMock.Object),
@@ -53,7 +56,10 @@ namespace Valkyr.ECS.Tests
     public void Update_ValidWorldAndThereAreEnitiesDisabledSystem_UpdateMethodIsNotCalled()
     {
       Mock<IWorld> worldMock = new();
-      Mock<System<UnittestComponent>> systemMock = new();
+      Mock<System<UnittestComponent>> systemMock = new()
+      {
+        CallBase = true
+      };
       Entity[] entities = new Entity[] {
           new Entity(1, worldMock.Object),
           new Entity(2, worldMock.Object),
