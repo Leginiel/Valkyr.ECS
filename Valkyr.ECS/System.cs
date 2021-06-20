@@ -6,7 +6,7 @@
     public bool Enabled { get; set; }
 
     protected abstract void Update(ref Entity entity);
-    public void Update(IWorld world)
+    public virtual void Update(IWorld world)
     {
       world.IterateEntities(Update, FilterExpressions.All());
     }
