@@ -2,7 +2,7 @@
 
 namespace Valkyr.ECS
 {
-  public readonly struct Entity : IEquatable<Entity>
+  public class Entity : IEquatable<Entity>
   {
     public readonly int Id;
     private readonly IWorld world;
@@ -37,7 +37,6 @@ namespace Valkyr.ECS
     {
       return Id.Equals(other.Id);
     }
-
     public override bool Equals(object obj)
     {
       return obj is Entity entity && Equals(entity);
