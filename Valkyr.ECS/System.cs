@@ -1,14 +1,17 @@
-﻿namespace Valkyr.ECS
+﻿using System.Threading.Tasks;
+
+namespace Valkyr.ECS
 {
-  public abstract class System<T> : ISystem
+  public abstract class System<T, TState> : IRunnable<TState>
     where T : struct, IComponent
   {
     public bool Enabled { get; set; }
 
-    protected abstract void Update(ref Entity entity);
-    public virtual void Update(IWorld world)
+    public bool CanProcess(Entity entity)
     {
-      world.IterateEntities(Update, FilterExpressions.Component<T>());
+      return Enabled && FilterExpressions.Component<T>().Matches(ref entity);
     }
+
+    public abstract Task Run(Entity entity, TState state);
   }
 }
