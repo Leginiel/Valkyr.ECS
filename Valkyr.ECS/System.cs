@@ -5,7 +5,7 @@ namespace Valkyr.ECS
   public abstract class System<T, TState> : IRunnable<TState>
     where T : struct, IComponent
   {
-    public bool Enabled { get; set; }
+    public bool Enabled { get; set; } = true;
 
     public bool CanProcess(Entity entity)
     {
