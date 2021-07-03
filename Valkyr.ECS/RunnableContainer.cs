@@ -9,6 +9,7 @@ namespace Valkyr.ECS
     private readonly IList<IRunnable<TState>> internalContainer;
     private readonly List<Task> tasks = new();
 
+    public bool Enabled { get; set; } = true;
     public bool RunInParallel { get; }
 
     public RunnableContainer(bool runInParallel = false)

@@ -69,6 +69,10 @@ namespace Valkyr.ECS.Tests
       Entity entity = new(0, null);
       RunnableContainer<int> container = new(internalContainer);
 
+
+      runnableMock.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
+      runnableMock2.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
+
       container.Add(runnableMock.Object);
       container.Add(runnableMock2.Object);
 
@@ -78,7 +82,7 @@ namespace Valkyr.ECS.Tests
       runnableMock2.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Once());
     }
     [Fact]
-    public async Task Update_NotProcessableEntityAndState_AllEntriesUpdated()
+    public async Task Update_NotProcessableEntityAndState_AllowedEntriesUpdated()
     {
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
@@ -87,6 +91,7 @@ namespace Valkyr.ECS.Tests
       RunnableContainer<int> container = new(internalContainer);
 
       runnableMock.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(false);
+      runnableMock2.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
 
       container.Add(runnableMock.Object);
       container.Add(runnableMock2.Object);
@@ -95,6 +100,26 @@ namespace Valkyr.ECS.Tests
 
       runnableMock.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Never());
       runnableMock2.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Once());
+    }
+    [Fact]
+    public async Task Update_ContainerIsDisabled_NothingUpdated()
+    {
+      Mock<IRunnable<int>> runnableMock = new();
+      Mock<IRunnable<int>> runnableMock2 = new();
+      List<IRunnable<int>> internalContainer = new();
+      Entity entity = new(0, null);
+      RunnableContainer<int> container = new(internalContainer)
+      {
+        Enabled = false
+      };
+
+      container.Add(runnableMock.Object);
+      container.Add(runnableMock2.Object);
+
+      await container.Run(entity, 1);
+
+      runnableMock.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Never());
+      runnableMock2.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Never());
     }
   }
 }
