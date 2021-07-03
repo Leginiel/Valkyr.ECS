@@ -47,6 +47,21 @@ namespace Valkyr.ECS
       else
         await RunSequential(entity, state);
     }
+    public bool Supports<T>()
+      where T : IRunnable<TState>
+    {
+      int index = 0;
+      int total = internalContainer.Count;
+      bool result = false;
+
+      while (index < total && !result)
+      {
+        result = internalContainer[index].Supports<T>();
+        index++;
+      }
+
+      return result;
+    }
 
     private async Task RunSequential(Entity entity, TState state)
     {
@@ -67,5 +82,7 @@ namespace Valkyr.ECS
       await Task.WhenAll(tasks);
       tasks.Clear();
     }
+
+
   }
 }

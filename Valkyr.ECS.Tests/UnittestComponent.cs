@@ -9,4 +9,13 @@
       Value = value;
     }
   }
+  public readonly struct UnittestComponent2 : IComponent
+  {
+    public readonly int Value;
+
+    public UnittestComponent2(int value)
+    {
+      Value = value;
+    }
+  }
 }

@@ -13,5 +13,11 @@ namespace Valkyr.ECS
     }
 
     public abstract Task Run(Entity entity, TState state);
+
+    public bool Supports<T1>()
+      where T1 : IRunnable<TState>
+    {
+      return GetType().Equals(typeof(T1));
+    }
   }
 }

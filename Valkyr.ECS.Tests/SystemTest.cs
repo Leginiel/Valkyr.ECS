@@ -63,5 +63,20 @@ namespace Valkyr.ECS.Tests
       systemMock.Object.Enabled = false;
       systemMock.Object.CanProcess(entity).Should().BeFalse();
     }
+    [Fact]
+    public void Supports_IsSameSystem_True()
+    {
+      UnittestSystem system = new(); 
+
+      system.Supports<UnittestSystem>().Should().BeTrue();
+    }
+    [Fact]
+    public void Supports_IsNotSameSystem_False()
+    {
+      UnittestSystem system = new();
+
+      system.Supports<UnittestSystem2>().Should().BeFalse();
+
+    }
   }
 }

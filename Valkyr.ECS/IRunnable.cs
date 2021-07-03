@@ -6,6 +6,8 @@ namespace Valkyr.ECS
   {
     bool Enabled { get; set; }
     bool CanProcess(Entity entity);
+    bool Supports<T>()
+      where T : IRunnable<TState>;
     Task Run(Entity entity, TState state);
   }
 }
