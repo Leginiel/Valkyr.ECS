@@ -2,7 +2,7 @@
 
 namespace Valkyr.ECS
 {
-  public class Entity : IEquatable<Entity>
+  public class Entity
   {
     public readonly int Id;
     private readonly IWorld world;
@@ -32,29 +32,6 @@ namespace Valkyr.ECS
       where T : IComponent
     {
       world.Set(Id, in component);
-    }
-    public bool Equals(Entity other)
-    {
-      return Id.Equals(other.Id);
-    }
-    public override bool Equals(object obj)
-    {
-      return obj is Entity entity && Equals(entity);
-    }
-
-    public override int GetHashCode()
-    {
-      return HashCode.Combine(Id);
-    }
-
-    public static bool operator ==(Entity left, Entity right)
-    {
-      return left.Equals(right);
-    }
-
-    public static bool operator !=(Entity left, Entity right)
-    {
-      return !(left == right);
     }
   }
 }

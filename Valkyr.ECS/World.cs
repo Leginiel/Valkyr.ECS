@@ -19,7 +19,7 @@ namespace Valkyr.ECS
       Id = id;
       this.maxCapacity = maxCapacity;
     }
-    public ref Entity CreateEntity()
+    public Entity CreateEntity()
     {
       if (freeEntities.Count == 0)
       {
@@ -27,7 +27,7 @@ namespace Valkyr.ECS
       }
       int nextId = freeEntities.Dequeue();
 
-      return ref entities[nextId];
+      return entities[nextId];
     }
 
     public bool Has<T>(int entityId)
@@ -58,14 +58,14 @@ namespace Valkyr.ECS
       Dispose(disposing: true);
       GC.SuppressFinalize(this);
     }
-    public void IterateEntities(ActionRef<Entity> entityCallback, IFilterExpression filter)
+    public void IterateEntities(Action<Entity> entityCallback, IFilterExpression filter)
     {
       for (int i = 0; i < entities.Length; i++)
       {
-        ref Entity entity = ref entities[i];
-        if (!freeEntities.Contains(i) && filter.Matches(ref entity))
+        Entity entity = entities[i];
+        if (!freeEntities.Contains(i) && filter.Matches(entity))
         {
-          entityCallback.Invoke(ref entity);
+          entityCallback.Invoke(entity);
         }
       }
     }
