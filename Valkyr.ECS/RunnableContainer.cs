@@ -47,16 +47,18 @@ namespace Valkyr.ECS
       else
         await RunSequential(entity, state);
     }
-    public bool Supports<T>()
+    public bool Supports<T>(out IRunnable<TState> outRunnable)
       where T : IRunnable<TState>
     {
       int index = 0;
       int total = internalContainer.Count;
       bool result = false;
 
+      outRunnable = default;
+
       while (index < total && !result)
       {
-        result = internalContainer[index].Supports<T>();
+        result = internalContainer[index].Supports<T>(out outRunnable);
         index++;
       }
 

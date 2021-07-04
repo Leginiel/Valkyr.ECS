@@ -68,14 +68,14 @@ namespace Valkyr.ECS.Tests
     {
       UnittestSystem system = new(); 
 
-      system.Supports<UnittestSystem>().Should().BeTrue();
+      system.Supports<UnittestSystem>(out _).Should().BeTrue();
     }
     [Fact]
     public void Supports_IsNotSameSystem_False()
     {
       UnittestSystem system = new();
 
-      system.Supports<UnittestSystem2>().Should().BeFalse();
+      system.Supports<UnittestSystem2>(out _).Should().BeFalse();
 
     }
   }

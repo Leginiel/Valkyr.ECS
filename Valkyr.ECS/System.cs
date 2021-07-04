@@ -9,15 +9,17 @@ namespace Valkyr.ECS
 
     public bool CanProcess(Entity entity)
     {
-      return Enabled && FilterExpressions.Component<T>().Matches(ref entity);
+      return Enabled && FilterExpressions.Component<T>().Matches(entity);
     }
 
     public abstract Task Run(Entity entity, TState state);
 
-    public bool Supports<T1>()
+    public bool Supports<T1>(out IRunnable<TState> outRunnable)
       where T1 : IRunnable<TState>
     {
-      return GetType().Equals(typeof(T1));
+      bool result = GetType().Equals(typeof(T1));
+      outRunnable = (result) ? this : default;
+      return result;
     }
   }
 }

@@ -133,13 +133,13 @@ namespace Valkyr.ECS.Tests
         Enabled = false
       };
 
-      runnableMock.Setup(_ => _.Supports<UnittestSystem>()).Returns(true);
-      runnableMock2.Setup(_ => _.Supports<UnittestSystem>()).Returns(false);
+      runnableMock.Setup(_ => _.Supports<UnittestSystem>(out It.Ref<IRunnable<int>>.IsAny)).Returns(true);
+      runnableMock2.Setup(_ => _.Supports<UnittestSystem>(out It.Ref<IRunnable<int>>.IsAny)).Returns(false);
 
       container.Add(runnableMock.Object);
       container.Add(runnableMock2.Object);
 
-      container.Supports<UnittestSystem>().Should().BeTrue();
+      container.Supports<UnittestSystem>(out _).Should().BeTrue();
     }
     [Fact]
     public void Supports_DoesNotContainSystemType_False()
@@ -147,19 +147,20 @@ namespace Valkyr.ECS.Tests
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
       List<IRunnable<int>> internalContainer = new();
+      IRunnable<int> _;
       Entity entity = new(0, null);
       RunnableContainer<int> container = new(internalContainer)
       {
         Enabled = false
       };
 
-      runnableMock.Setup(_ => _.Supports<UnittestSystem>()).Returns(false);
-      runnableMock2.Setup(_ => _.Supports<UnittestSystem>()).Returns(false);
+      runnableMock.Setup(_ => _.Supports<UnittestSystem>(out It.Ref<IRunnable<int>>.IsAny)).Returns(false);
+      runnableMock2.Setup(_ => _.Supports<UnittestSystem>(out It.Ref<IRunnable<int>>.IsAny)).Returns(false);
 
       container.Add(runnableMock.Object);
       container.Add(runnableMock2.Object);
 
-      container.Supports<UnittestSystem>().Should().BeFalse();
+      container.Supports<UnittestSystem>(out _).Should().BeFalse();
     }
   }
 }
