@@ -9,13 +9,13 @@ namespace Valkyr.ECS.Tests
   {
     public ContextTest()
     {
-      UnittestSystem.Reset();
+      UnittestSystem.UpdatedEntities.Clear();
     }
 
     [Fact]
     public void CreateWorld_None_WorldSuccessfullyCreated()
     {
-      using Context context = new();
+      using Context<int> context = new();
       IWorld world = context.CreateWorld();
 
       world.Should().NotBeNull();
@@ -24,7 +24,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void DestroyWorld_ValidWorld_WorldSuccessfullyDestroyed()
     {
-      using Context context = new();
+      using Context<int> context = new();
       IWorld world = context.CreateWorld();
 
       context.DestroyWorld(world);
@@ -33,7 +33,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void DestroyWorld_ValidWorldId_WorldSuccessfullyDestroyed()
     {
-      using Context context = new();
+      using Context<int> context = new();
       IWorld world = context.CreateWorld();
 
       context.DestroyWorld(world.Id);
@@ -42,7 +42,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void RegisterSystem_ValidSystem_SystemIsSuccessfullyRegistered()
     {
-      using Context context = new();
+      using Context<int> context = new();
 
       context.RegisterSystem<UnittestSystem>();
       context.IsRegistered<UnittestSystem>().Should().BeTrue();
@@ -50,7 +50,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void UnregisterSystem_ValidSystem_SystemIsSuccessfullyUnregistered()
     {
-      using Context context = new();
+      using Context<int> context = new();
 
       context.RegisterSystem<UnittestSystem>();
       context.UnregisterSystem<UnittestSystem>();
@@ -59,7 +59,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void UnregisterSystem_NotRegisteredSystem_InvalidOperationException()
     {
-      using Context context = new();
+      using Context<int> context = new();
       Action action = () => context.UnregisterSystem<UnittestSystem>();
 
       action.Should().Throw<InvalidOperationException>();
@@ -67,7 +67,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void EnableSystem_ValidSystem_SystemIsSuccessfullyEnabled()
     {
-      using Context context = new();
+      using Context<int> context = new();
 
       context.RegisterSystem<UnittestSystem>();
       context.EnableSystem<UnittestSystem>();
@@ -76,7 +76,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void EnableSystem_NotRegisteredSystem_InvalidOperationException()
     {
-      using Context context = new();
+      using Context<int> context = new();
       Action action = () => context.EnableSystem<UnittestSystem>();
 
       action.Should().Throw<InvalidOperationException>();
@@ -84,7 +84,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void DisableSystem_ValidSystem_SystemIsSuccessfullyDisabled()
     {
-      using Context context = new();
+      using Context<int> context = new();
 
       context.RegisterSystem<UnittestSystem>();
       context.EnableSystem<UnittestSystem>();
@@ -94,7 +94,7 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void DisableSystem_NotRegisteredSystem_InvalidOperationException()
     {
-      using Context context = new();
+      using Context<int> context = new();
       Action action = () => context.DisableSystem<UnittestSystem>();
 
       action.Should().Throw<InvalidOperationException>();
@@ -102,39 +102,46 @@ namespace Valkyr.ECS.Tests
     [Fact]
     public void Update_None_AllWorldsUpdated()
     {
-      using Context context = new();
-      List<IWorld> expectedWorlds = new()
+      using Context<int> context = new();
+      IWorld world = context.CreateWorld();
+      IWorld world1 = context.CreateWorld();
+      List<Entity> expectedEntities = new()
       {
-        context.CreateWorld(),
-        context.CreateWorld()
+        world.CreateEntity(),
+        world.CreateEntity(),
+        world1.CreateEntity(),
+        world1.CreateEntity(),
       };
 
       context.RegisterSystem<UnittestSystem>();
 
-      context.Update();
+      context.Update(1);
 
-      UnittestSystem.UpdatedWorlds.Should().ContainInOrder(expectedWorlds);
+      UnittestSystem.UpdatedEntities.Should().ContainInOrder(expectedEntities);
     }
 
     [Fact]
     public void Update_None_AllActiveWorldsUpdated()
     {
-      using Context context = new();
-      List<IWorld> expectedWorlds = new()
-      {
-        context.CreateWorld(),
-        context.CreateWorld()
-      };
+      using Context<int> context = new();
       IWorld world = context.CreateWorld();
+      IWorld world2 = context.CreateWorld();
+      Entity entity = world2.CreateEntity();
+      List<Entity> expectedEntities = new()
+      {
+        world.CreateEntity(),
+        world.CreateEntity()
+      };
 
-      world.Active = false;
+
+      world2.Active = false;
 
       context.RegisterSystem<UnittestSystem>();
 
-      context.Update();
+      context.Update(1);
 
-      UnittestSystem.UpdatedWorlds.Should().ContainInOrder(expectedWorlds);
-      UnittestSystem.UpdatedWorlds.Should().NotContain(world);
+      UnittestSystem.UpdatedEntities.Should().ContainInOrder(expectedEntities);
+      UnittestSystem.UpdatedEntities.Should().NotContain(entity);
     }
   }
 }
