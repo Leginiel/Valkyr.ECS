@@ -48,6 +48,16 @@ namespace Valkyr.ECS.Tests
       context.IsRegistered<UnittestSystem>().Should().BeTrue();
     }
     [Fact]
+    public void RegisterSystem_MultipleValidSystems_SystemsAreSuccessfullyRegistered()
+    {
+      using Context<int> context = new();
+
+      context.RegisterSystem<UnittestSystem>();
+      context.RegisterSystem<UnittestSystem2>();
+      context.IsRegistered<UnittestSystem>().Should().BeTrue();
+      context.IsRegistered<UnittestSystem2>().Should().BeTrue();
+    }
+    [Fact]
     public void UnregisterSystem_ValidSystem_SystemIsSuccessfullyUnregistered()
     {
       using Context<int> context = new();
@@ -55,6 +65,18 @@ namespace Valkyr.ECS.Tests
       context.RegisterSystem<UnittestSystem>();
       context.UnregisterSystem<UnittestSystem>();
       context.IsRegistered<UnittestSystem>().Should().BeFalse();
+    }
+    [Fact]
+    public void UnregisterSystem_MultipleValidSystems_SystemAreSuccessfullyUnregistered()
+    {
+      using Context<int> context = new();
+
+      context.RegisterSystem<UnittestSystem>();
+      context.RegisterSystem<UnittestSystem2>();
+      context.UnregisterSystem<UnittestSystem>();
+      context.UnregisterSystem<UnittestSystem2>();
+      context.IsRegistered<UnittestSystem>().Should().BeFalse();
+      context.IsRegistered<UnittestSystem2>().Should().BeFalse();
     }
     [Fact]
     public void UnregisterSystem_NotRegisteredSystem_InvalidOperationException()
