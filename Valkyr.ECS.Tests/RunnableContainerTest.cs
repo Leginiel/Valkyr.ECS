@@ -24,7 +24,7 @@ namespace Valkyr.ECS.Tests
     public void Add_Null_ThrowsArgumentNullException()
     {
       List<IRunnable<int>> internalContainer = new();
-      RunnableContainer<int> container = new(internalContainer);
+      RunnableContainer<int> container = new();
       Action action = () => container.Add(null);
 
       action.Should().Throw<ArgumentNullException>();
@@ -45,7 +45,7 @@ namespace Valkyr.ECS.Tests
     {
       Mock<IRunnable<int>> runnableMock = new();
       List<IRunnable<int>> internalContainer = new();
-      RunnableContainer<int> container = new(internalContainer);
+      RunnableContainer<int> container = new();
       Action action = () => container.Remove(runnableMock.Object);
 
       action.Should().Throw<ArgumentException>();
@@ -54,20 +54,37 @@ namespace Valkyr.ECS.Tests
     public void Remove_Null_ThrowsArgumentNullException()
     {
       List<IRunnable<int>> internalContainer = new();
-      RunnableContainer<int> container = new(internalContainer);
+      RunnableContainer<int> container = new();
       Action action = () => container.Remove(null);
 
       action.Should().Throw<ArgumentNullException>();
     }
-
     [Fact]
-    public async Task Update_ValidEntityAndState_AllEntriesUpdated()
+    public async Task Run_ValidEntityAndStateAndParallelExecution_AllEntriesUpdated()
     {
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
-      List<IRunnable<int>> internalContainer = new();
       Entity entity = new(0, null);
-      RunnableContainer<int> container = new(internalContainer);
+      RunnableContainer<int> container = new(true);
+
+
+      runnableMock.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
+      runnableMock2.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
+
+      container.Add(runnableMock.Object);
+      container.Add(runnableMock2.Object);
+      await container.Run(entity, 1);
+
+      runnableMock.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Once());
+      runnableMock2.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Once());
+    }
+    [Fact]
+    public async Task Run_ValidEntityAndState_AllEntriesUpdated()
+    {
+      Mock<IRunnable<int>> runnableMock = new();
+      Mock<IRunnable<int>> runnableMock2 = new();
+      Entity entity = new(0, null);
+      RunnableContainer<int> container = new();
 
 
       runnableMock.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
@@ -82,13 +99,12 @@ namespace Valkyr.ECS.Tests
       runnableMock2.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Once());
     }
     [Fact]
-    public async Task Update_NotProcessableEntityAndState_AllowedEntriesUpdated()
+    public async Task Run_NotProcessableEntityAndState_AllowedEntriesUpdated()
     {
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
-      List<IRunnable<int>> internalContainer = new();
       Entity entity = new(0, null);
-      RunnableContainer<int> container = new(internalContainer);
+      RunnableContainer<int> container = new();
 
       runnableMock.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(false);
       runnableMock2.Setup(_ => _.CanProcess(It.IsAny<Entity>())).Returns(true);
@@ -102,13 +118,12 @@ namespace Valkyr.ECS.Tests
       runnableMock2.Verify(_ => _.Run(It.IsAny<Entity>(), 1), Times.Once());
     }
     [Fact]
-    public async Task Update_ContainerIsDisabled_NothingUpdated()
+    public async Task Run_ContainerIsDisabled_NothingUpdated()
     {
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
-      List<IRunnable<int>> internalContainer = new();
       Entity entity = new(0, null);
-      RunnableContainer<int> container = new(internalContainer)
+      RunnableContainer<int> container = new()
       {
         Enabled = false
       };
@@ -126,9 +141,8 @@ namespace Valkyr.ECS.Tests
     {
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
-      List<IRunnable<int>> internalContainer = new();
       Entity entity = new(0, null);
-      RunnableContainer<int> container = new(internalContainer)
+      RunnableContainer<int> container = new()
       {
         Enabled = false
       };
@@ -146,10 +160,9 @@ namespace Valkyr.ECS.Tests
     {
       Mock<IRunnable<int>> runnableMock = new();
       Mock<IRunnable<int>> runnableMock2 = new();
-      List<IRunnable<int>> internalContainer = new();
       IRunnable<int> _;
       Entity entity = new(0, null);
-      RunnableContainer<int> container = new(internalContainer)
+      RunnableContainer<int> container = new()
       {
         Enabled = false
       };
