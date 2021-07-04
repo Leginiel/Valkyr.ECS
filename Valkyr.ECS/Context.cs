@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Valkyr.ECS
 {
-  public sealed class Context : IDisposable
+  public sealed class Context<TState> : IDisposable
   {
     private bool disposedValue;
     private readonly Dictionary<short, IWorld> worlds = new();
-    private readonly Dictionary<Type, ISystem> systems = new();
+    private IRunnable<TState> runner;
     private short nextWorldId = 0;
 
     public IWorld CreateWorld(int maxCapacity = int.MaxValue)
@@ -32,59 +32,76 @@ namespace Valkyr.ECS
       return worlds.ContainsKey(id);
     }
     public void RegisterSystem<T>()
-      where T : ISystem, new()
+      where T : IRunnable<TState>, new()
     {
-      ISystem system = new T();
+      if (runner is RunnableContainer<TState> container)
+      {
+        container.Add(new T());
+        runner = container;
 
-      systems.Add(system.GetType(), system);
+      }
+      else if (runner is not null)
+      {
+        container = new RunnableContainer<TState>();
+
+        container.Add(runner);
+        container.Add(new T());
+        runner = container;
+      }
+      else
+      {
+        runner = new T();
+      }
     }
     public void UnregisterSystem<T>()
-      where T : ISystem
+      where T : class, IRunnable<TState>
     {
-      Type systemType = typeof(T);
+      T system = EnsureSystemRegistered<T>();
 
-      EnsureSystemRegistered(systemType);
-
-      systems.Remove(systemType);
+      if (runner is RunnableContainer<TState> container)
+      {
+        container.Remove(system);
+      }
+      else
+      {
+        runner = null;
+      }
     }
     public bool IsRegistered<T>()
-      where T : ISystem
+      where T : class, IRunnable<TState>
     {
-      return systems.ContainsKey(typeof(T));
+      return runner is not null && runner.Supports<T>(out _);
     }
     public bool IsEnabled<T>()
-      where T : ISystem
+      where T : class, IRunnable<TState>
     {
-      return EnsureSystemRegistered(typeof(T)).Enabled;
+      return EnsureSystemRegistered<T>().Enabled;
     }
 
     public void EnableSystem<T>()
-      where T : ISystem
+      where T : class, IRunnable<TState>
     {
-      EnsureSystemRegistered(typeof(T)).Enabled = true;
+      EnsureSystemRegistered<T>().Enabled = true;
     }
     public void DisableSystem<T>()
-      where T : ISystem
+      where T : class, IRunnable<TState>
     {
-      EnsureSystemRegistered(typeof(T)).Enabled = false;
+      EnsureSystemRegistered<T>().Enabled = false;
     }
-    public void Update()
+    public void Update(TState state)
     {
       foreach (IWorld world in worlds.Values)
       {
         if (world.Active)
         {
-          Update(world);
+          Update(world, state);
         }
       }
     }
 
-    private void Update(IWorld world)
+    private void Update(IWorld world, TState state)
     {
-      foreach (ISystem system in systems.Values)
-      {
-        system.Update(world);
-      }
+      world.IterateEntities((entity) => runner.Run(entity, state), FilterExpressions.All());
     }
 
     public void Dispose()
@@ -105,18 +122,19 @@ namespace Valkyr.ECS
             entry.Value.Dispose();
           }
 
-          systems.Clear();
+          runner = null;
           worlds.Clear();
         }
         disposedValue = true;
       }
     }
-    private ISystem EnsureSystemRegistered(Type systemType)
+    private T EnsureSystemRegistered<T>()
+      where T : class, IRunnable<TState>
     {
-      if (!systems.ContainsKey(systemType))
-        throw new InvalidOperationException($"System {systemType.Name} is not registered.");
+      if (runner is null || !runner.Supports<T>(out IRunnable<TState> result))
+        throw new InvalidOperationException($"System {typeof(T).Name} is not registered.");
 
-      return systems[systemType];
+      return result as T;
     }
 
   }

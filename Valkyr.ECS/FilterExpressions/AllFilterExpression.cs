@@ -2,7 +2,7 @@
 {
   public class AllFilterExpression : IFilterExpression
   {
-    public bool Matches<T>(ref T element)
+    public bool Matches<T>(T element)
     {
       return true;
     }

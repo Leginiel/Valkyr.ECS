@@ -2,6 +2,6 @@
 {
   public interface IFilterExpression
   {
-    bool Matches<T>(ref T element);
+    bool Matches<T>(T element);
   }
 }

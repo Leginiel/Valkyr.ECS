@@ -1,94 +1,82 @@
-﻿using Moq;
-using Moq.Protected;
+﻿using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace Valkyr.ECS.Tests
 {
   public class SystemTest
   {
-    // Helper interface to make the MockSetup easier:
-    // see example in https://github.com/moq/moq4/issues/223
-    private interface ISystemImpl
-    {
-      public void Update(ref Entity entity);
-    }
     [Fact]
-    public void Update_ValidWorldAndThereAreEnities_UpdateMethodIsCalledForEveryValidEntity()
+    public void CanProcess_ValidEntityAndSystemIsEnabled_True()
     {
       Mock<IWorld> worldMock = new();
-      Mock<System<UnittestComponent>> systemMock = new()
+      Mock<System<UnittestComponent, int>> systemMock = new()
       {
         CallBase = true
       };
-      Entity[] entities = new Entity[] {
-          new Entity(1, worldMock.Object),
-          new Entity(2, worldMock.Object),
-          new Entity(3, worldMock.Object),
-          new Entity(4, worldMock.Object)
-        };
+      Entity entity = new(1, worldMock.Object);
+      worldMock.Setup(_ => _.Has<UnittestComponent>(It.IsAny<int>())).Returns(true);
 
-      worldMock.Setup(_ => _.IterateEntities(It.IsAny<ActionRef<Entity>>(), It.IsAny<IFilterExpression>()))
-               .Callback<ActionRef<Entity>, IFilterExpression>((callback, filter) =>
-               {
-                 for (int i = 0; i < entities.Length; i++)
-                 {
-                   callback.Invoke(ref entities[i]);
-                 }
-               });
-      worldMock.SetupSequence(_ => _.Has<UnittestComponent>(It.IsAny<int>()))
-               .Returns(true)
-               .Returns(false)
-               .Returns(true)
-               .Returns(true);
-
-      systemMock.Object.Update(worldMock.Object);
-      systemMock.Protected()
-                .As<ISystemImpl>()
-                .Verify(_ => _.Update(ref entities[0]), Times.Once());
-      systemMock.Protected()
-                .As<ISystemImpl>()
-                .Verify(_ => _.Update(ref entities[2]), Times.Once());
-      systemMock.Protected()
-                .As<ISystemImpl>()
-                .Verify(_ => _.Update(ref entities[3]), Times.Once());
+      systemMock.Object.CanProcess(entity).Should().BeTrue();
     }
     [Fact]
-    public void Update_ValidWorldAndThereAreEnitiesDisabledSystem_UpdateMethodIsNotCalled()
+    public void CanProcess_ValidEntityAndSystemIsDisabled_False()
     {
       Mock<IWorld> worldMock = new();
-      Mock<System<UnittestComponent>> systemMock = new()
+      Mock<System<UnittestComponent, int>> systemMock = new()
       {
         CallBase = true
       };
-      Entity[] entities = new Entity[] {
-          new Entity(1, worldMock.Object),
-          new Entity(2, worldMock.Object),
-          new Entity(3, worldMock.Object),
-          new Entity(4, worldMock.Object)
-        };
+      Entity entity = new(1, worldMock.Object);
 
-      worldMock.Setup(_ => _.IterateEntities(It.IsAny<ActionRef<Entity>>(), It.IsAny<IFilterExpression>()))
-               .Callback<ActionRef<Entity>, IFilterExpression>((callback, filter) =>
-               {
-                 for (int i = 0; i < entities.Length; i++)
-                 {
-                   callback.Invoke(ref entities[i]);
-                 }
-               });
-      worldMock.SetupSequence(_ => _.Has<UnittestComponent>(It.IsAny<int>()))
-               .Returns(true)
-               .Returns(false)
-               .Returns(true)
-               .Returns(true);
-      systemMock.Protected()
-                .As<ISystemImpl>()
-                .Verify(_ => _.Update(ref It.Ref<Entity>.IsAny), Times.Never());
+      worldMock.Setup(_ => _.Has<UnittestComponent>(It.IsAny<int>())).Returns(true);
 
       systemMock.Object.Enabled = false;
+      systemMock.Object.CanProcess(entity).Should().BeFalse();
+    }
+    [Fact]
+    public void CanProcess_InvalidEntityAndSystemIsEnabled_False()
+    {
+      Mock<IWorld> worldMock = new();
+      Mock<System<UnittestComponent, int>> systemMock = new()
+      {
+        CallBase = true
+      };
+      Entity entity = new(1, worldMock.Object);
 
-      systemMock.Object.Update(worldMock.Object);
+      worldMock.Setup(_ => _.Has<UnittestComponent>(It.IsAny<int>())).Returns(false);
 
-      systemMock.VerifyAll();
+      systemMock.Object.CanProcess(entity).Should().BeFalse();
+    }
+    [Fact]
+    public void CanProcess_InvalidEntityAndSystemIsDisabled_False()
+    {
+      Mock<IWorld> worldMock = new();
+      Mock<System<UnittestComponent, int>> systemMock = new()
+      {
+        CallBase = true
+      };
+      Entity entity = new(1, worldMock.Object);
+
+      worldMock.Setup(_ => _.Has<UnittestComponent>(It.IsAny<int>())).Returns(false);
+
+      systemMock.Object.Enabled = false;
+      systemMock.Object.CanProcess(entity).Should().BeFalse();
+    }
+    [Fact]
+    public void Supports_IsSameSystem_True()
+    {
+      UnittestSystem system = new(); 
+
+      system.Supports<UnittestSystem>(out _).Should().BeTrue();
+    }
+    [Fact]
+    public void Supports_IsNotSameSystem_False()
+    {
+      UnittestSystem system = new();
+
+      system.Supports<UnittestSystem2>(out _).Should().BeFalse();
+
     }
   }
 }

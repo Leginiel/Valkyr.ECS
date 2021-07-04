@@ -1,21 +1,23 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Valkyr.ECS.Tests
 {
-  public class UnittestSystem : System<UnittestComponent>
+  public class UnittestSystem : System<UnittestComponent, int>
   {
-    public static readonly List<IWorld> UpdatedWorlds = new();
-    protected override void Update(ref Entity entity)
-    {
-    }
-    public override void Update(IWorld world)
-    {
-      UpdatedWorlds.Add(world);
-    }
+    public static List<Entity> UpdatedEntities { get; } = new();
 
-    internal static void Reset()
+    public override Task Run(Entity entity, int state)
     {
-      UpdatedWorlds.Clear();
+      UpdatedEntities.Add(entity);
+      return Task.CompletedTask;
+    }
+  }
+  public class UnittestSystem2 : System<UnittestComponent2, int>
+  {
+    public override Task Run(Entity entity, int state)
+    {
+      return Task.CompletedTask;
     }
   }
 }

@@ -6,7 +6,7 @@ namespace Valkyr.ECS
   {
     short Id { get; }
     bool Active { get; set; }
-    ref Entity CreateEntity();
+    Entity CreateEntity();
     bool Has<T>(int entityId)
       where T : IComponent;
     ref T Get<T>(int entityId)
@@ -15,6 +15,6 @@ namespace Valkyr.ECS
       where T : IComponent;
     void Remove<T>(int entityId)
       where T : IComponent;
-    void IterateEntities(ActionRef<Entity> entityCallback, IFilterExpression filter);
+    void IterateEntities(Action<Entity> entityCallback, IFilterExpression filter);
   }
 }

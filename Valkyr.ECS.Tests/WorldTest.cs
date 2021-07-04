@@ -114,7 +114,7 @@ namespace Valkyr.ECS.Tests
     public void IterateEntities_WorldHasEntities_AllEntitiesAreReturned()
     {
       using World world = new(0);
-      Mock<ActionRef<Entity>> entityActionMock = new();
+      Mock<Action<Entity>> entityActionMock = new();
       List<Entity> expectedResult = new()
       {
         world.CreateEntity(),
@@ -123,12 +123,12 @@ namespace Valkyr.ECS.Tests
       };
       List<Entity> result = new();
 
-      entityActionMock.Setup(_ => _.Invoke(ref It.Ref<Entity>.IsAny))
-                      .Callback(new ActionRef<Entity>((ref Entity _) => result.Add(_)));
+      entityActionMock.Setup(_ => _.Invoke(It.IsAny<Entity>()))
+                      .Callback(new Action<Entity>((Entity _) => result.Add(_)));
 
       world.IterateEntities(entityActionMock.Object, FilterExpressions.All());
 
-      entityActionMock.Verify(_ => _.Invoke(ref It.Ref<Entity>.IsAny), Times.Exactly(3));
+      entityActionMock.Verify(_ => _.Invoke(It.IsAny<Entity>()), Times.Exactly(3));
       expectedResult.Should().BeEquivalentTo(result);
     }
   }
